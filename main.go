@@ -1,9 +1,10 @@
 package main
 
 import (
-	hdf5 "education/hdf5"
 	"fmt"
 	"log"
+
+	"education/hdf5"
 )
 
 func main() {
@@ -112,4 +113,6 @@ func main() {
 	}
 
 	log.Println("HDF5 file, group, and dataset with data created successfully.")
+
+	fmt.Println(file.GetFileName(), file.GetType())
 }

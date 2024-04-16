@@ -20,3 +20,11 @@ func CreateFile(fileName string) (*File, error) {
 
 	return &File{file}, nil
 }
+
+func (f *File) GetFileName() string {
+	return f.FileName()
+}
+
+func (f *File) GetType() string {
+	return f.Type().String()
+}
