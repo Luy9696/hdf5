@@ -1,0 +1,280 @@
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"gonum.org/v1/hdf5"
+)
+
+func main() {
+	// HDF5 파일 생성
+	fname := "example.h5"
+	file, err := hdf5.CreateFile(fname, hdf5.F_ACC_TRUNC)
+	if err != nil {
+		log.Fatalf("Failed to create file: %s", err)
+	}
+	defer file.Close()
+
+	ImageData, err := addGroup(&file.CommonFG, "ImageData")
+	addGroupAttribute(ImageData, "Type", []int32{42})
+	addGroupAttribute(ImageData, "byte_length", []int32{8858})
+	addGroupAttribute(ImageData, "sorted", []int32{1})
+	addGroupAttribute(ImageData, "closed", []int32{0})
+	addGroupAttribute(ImageData, "num_tags", []int32{5})
+	addGroupAttribute(ImageData, "data_offset", []int32{438438})
+	// ImageData.Close()
+	if err != nil {
+		fmt.Println("Failed to create group")
+	}
+
+	Data, err := addDataset(ImageData, "Data", []uint{5, 5}, hdf5.T_ALPHA_I32)
+	addDatasetAttribute(Data, "byte_length", []int32{8828})
+	addDatasetAttribute(Data, "array_length", []int32{3})
+	addDatasetAttribute(Data, "data_type_code", []int32{20})
+	addDatasetAttribute(Data, "header_offset", []int32{438889})
+	addDatasetAttribute(Data, "data_offset", []int32{438904})
+
+	DataType, err := addDataset(ImageData, "DataType", []uint{5, 5}, hdf5.T_ALPHA_I32)
+	addDatasetAttribute(DataType, "byte_length", []int32{24})
+	addDatasetAttribute(DataType, "array_length", []int32{1})
+	addDatasetAttribute(DataType, "data_type_code", []int32{5})
+	addDatasetAttribute(DataType, "header_offset", []int32{447132})
+	addDatasetAttribute(DataType, "data_offset", []int32{447151})
+
+	PixelDepth, err := addDataset(ImageData, "PixelDepth", []uint{5, 5}, hdf5.T_ALPHA_I32)
+	addDatasetAttribute(PixelDepth, "byte_length", []int32{24})
+	addDatasetAttribute(PixelDepth, "array_length", []int32{1})
+	addDatasetAttribute(PixelDepth, "data_type_code", []int32{5})
+	addDatasetAttribute(PixelDepth, "header_offset", []int32{447241})
+	addDatasetAttribute(PixelDepth, "data_offset", []int32{447262})
+
+	Calibrations, err := addGroup(&ImageData.CommonFG, "Calibrations")
+	addGroupAttribute(Calibrations, "Type", []int32{20})
+	addGroupAttribute(Calibrations, "byte_length", []int32{428})
+	addGroupAttribute(Calibrations, "sorted", []int32{1})
+	addGroupAttribute(Calibrations, "closed", []int32{0})
+	addGroupAttribute(Calibrations, "num_tags", []int32{3})
+	addGroupAttribute(Calibrations, "data_offset", []int32{438471})
+	// Calibrations.Close()
+	DisplayCalibratedUnits, err := addDataset(Calibrations, "DisplayCalibratedUnits", []uint{5, 5}, hdf5.T_ALPHA_I32)
+	addDatasetAttribute(DisplayCalibratedUnits, "byte_length", []int32{24})
+	addDatasetAttribute(DisplayCalibratedUnits, "array_length", []int32{1})
+	addDatasetAttribute(DisplayCalibratedUnits, "data_type_code", []int32{6})
+	addDatasetAttribute(DisplayCalibratedUnits, "header_offset", []int32{438502})
+	addDatasetAttribute(DisplayCalibratedUnits, "data_offset", []int32{438519})
+
+	Brightness, err := addGroup(&ImageData.CommonFG, "Brightness")
+	addGroupAttribute(Brightness, "Type", []int32{20})
+	addGroupAttribute(Brightness, "byte_length", []int32{155})
+	addGroupAttribute(Brightness, "sorted", []int32{1})
+	addGroupAttribute(Brightness, "closed", []int32{0})
+	addGroupAttribute(Brightness, "num_tags", []int32{3})
+	addGroupAttribute(Brightness, "data_offset", []int32{438502})
+	// Brightness.Close()
+
+	Origin, err := addDataset(Brightness, "Origin", []uint{5, 5}, hdf5.T_ALPHA_I32)
+	addDatasetAttribute(Origin, "byte_length", []int32{24})
+	addDatasetAttribute(Origin, "array_length", []int32{1})
+	addDatasetAttribute(Origin, "data_type_code", []int32{6})
+	addDatasetAttribute(Origin, "header_offset", []int32{438502})
+	addDatasetAttribute(Origin, "data_offset", []int32{438519})
+
+	Scale, err := addDataset(Brightness, "Scale", []uint{5, 5}, hdf5.T_ALPHA_I32)
+	addDatasetAttribute(Scale, "byte_length", []int32{24})
+	addDatasetAttribute(Scale, "array_length", []int32{1})
+	addDatasetAttribute(Scale, "data_type_code", []int32{6})
+	addDatasetAttribute(Scale, "header_offset", []int32{438543})
+	addDatasetAttribute(Scale, "data_offset", []int32{438559})
+
+	Units, err := addDataset(Brightness, "Units", []uint{5, 5}, hdf5.T_ALPHA_I32)
+	addDatasetAttribute(Units, "byte_length", []int32{48})
+	addDatasetAttribute(Units, "array_length", []int32{3})
+	addDatasetAttribute(Units, "data_type_code", []int32{20})
+	addDatasetAttribute(Units, "header_offset", []int32{438583})
+	addDatasetAttribute(Units, "data_offset", []int32{438599})
+
+	if err != nil {
+		fmt.Println("Failed to create group")
+	}
+
+	log.Println("HDF5 file, group, and dataset with data created successfully.")
+}
+
+func addGroup(commonFg *hdf5.CommonFG, groupName string) (*hdf5.Group, error) {
+	// 그룹 생성
+	group, err := commonFg.CreateGroup(groupName)
+	if err != nil {
+		log.Fatalf("Failed to create group: %s", err)
+	}
+	// defer group.Close()
+
+	return group, err
+}
+
+// func addGroupAttribute(group *hdf5.Group, attributeName string, attrData []int32) error {
+// 	space, err := hdf5.CreateSimpleDataspace([]uint{1}, nil) // 1차원 데이터 공간
+// 	if err != nil {
+// 		log.Fatalf("Failed to create dataspace: %s", err)
+// 		return err
+// 	}
+// 	defer space.Close()
+
+// 	// 속성 생성
+// 	attr, err := group.CreateAttribute(attributeName, hdf5.T_NATIVE_INT, space)
+// 	if err != nil {
+// 		log.Fatalf("Failed to create attribute: %s", err)
+// 		return err
+// 	}
+// 	defer attr.Close()
+
+// 	// 속성 데이터 쓰기
+// 	err = attr.Write(&attrData[0], hdf5.T_NATIVE_INT)
+// 	if err != nil {
+// 		log.Fatalf("Failed to write attribute: %s", err)
+// 		return err
+// 	}
+// 	return nil
+// }
+
+func addGroupAttribute(group *hdf5.Group, attributeName string, attrData interface{}) error {
+	// 데이터의 길이 파악
+	var length uint
+	switch data := attrData.(type) {
+	case []int32:
+		length = uint(len(data))
+	case []float64:
+		length = uint(len(data))
+	case []string:
+		length = uint(len(data))
+	default:
+		log.Fatalf("Unsupported attribute data type")
+		return fmt.Errorf("unsupported attribute data type")
+	}
+
+	// 데이터 공간 생성
+	space, err := hdf5.CreateSimpleDataspace([]uint{length}, nil)
+	if err != nil {
+		log.Fatalf("Failed to create dataspace: %s", err)
+		return err
+	}
+	defer space.Close()
+
+	// 데이터 타입 파악 및 속성 생성
+	var attr *hdf5.Attribute
+	var dataType *hdf5.Datatype
+	switch attrData.(type) {
+	case []int32:
+		dataType = hdf5.T_NATIVE_INT
+	case []float64:
+		dataType = hdf5.T_NATIVE_DOUBLE
+	case []string:
+		dataType = hdf5.T_GO_STRING
+	default:
+		log.Fatalf("Unsupported attribute data type")
+		return fmt.Errorf("unsupported attribute data type")
+	}
+
+	attr, err = group.CreateAttribute(attributeName, dataType, space)
+	if err != nil {
+		log.Fatalf("Failed to create attribute: %s", err)
+		return err
+	}
+	defer attr.Close()
+
+	// 속성 데이터 쓰기
+	err = attr.Write(attrData, dataType)
+	if err != nil {
+		log.Fatalf("Failed to write attribute: %s", err)
+		return err
+	}
+
+	return nil
+}
+
+func addDataset(group *hdf5.Group, datasetName string, space []uint, dtype *hdf5.Datatype) (*hdf5.Dataset, error) {
+	// 데이터 공간 생성
+	dspace, err := hdf5.CreateSimpleDataspace(space, nil)
+	if err != nil {
+		log.Printf("Failed to create dataspace: %s", err) // 에러 로깅 후 반환
+		return nil, err
+	}
+	defer dspace.Close()
+
+	// 데이터셋 생성
+	dset, err := group.CreateDataset(datasetName, dtype, dspace)
+	if err != nil {
+		log.Printf("Failed to create dataset: %s", err) // 에러 로깅 후 반환
+		return nil, err
+	}
+	// defer dset.Close() // 호출자가 닫을 책임
+	return dset, nil
+}
+
+// func addDatasetAttribute(dataset *hdf5.Dataset, attributeName string, attrData []int32) error {
+// 	space, err := hdf5.CreateSimpleDataspace([]uint{1}, nil) // 1차원 데이터 공간
+// 	if err != nil {
+// 		log.Fatalf("Failed to create dataspace: %s", err)
+// 		return err
+// 	}
+// 	defer space.Close()
+
+// 	// 속성 생성
+// 	attr, err := dataset.CreateAttribute(attributeName, hdf5.T_NATIVE_INT, space)
+// 	if err != nil {
+// 		log.Fatalf("Failed to create attribute: %s", err)
+// 		return err
+// 	}
+// 	defer attr.Close()
+
+//		// 속성 데이터 쓰기
+//		err = attr.Write(&attrData[0], hdf5.T_NATIVE_INT)
+//		if err != nil {
+//			log.Fatalf("Failed to write attribute: %s", err)
+//			return err
+//		}
+//		return nil
+//	}
+func addDatasetAttribute(dataset *hdf5.Dataset, attributeName string, attrData interface{}) error {
+	// 데이터의 길이 파악 및 데이터 공간 생성
+	var length uint
+	var dataType *hdf5.Datatype
+	switch data := attrData.(type) {
+	case []int32:
+		length = uint(len(data))
+		dataType = hdf5.T_NATIVE_INT
+	case []float64:
+		length = uint(len(data))
+		dataType = hdf5.T_NATIVE_DOUBLE
+	case []string:
+		length = uint(len(data))
+		dataType = hdf5.T_GO_STRING
+	default:
+		log.Fatalf("Unsupported attribute data type")
+		return fmt.Errorf("unsupported attribute data type")
+	}
+
+	space, err := hdf5.CreateSimpleDataspace([]uint{length}, nil)
+	if err != nil {
+		log.Fatalf("Failed to create dataspace: %s", err)
+		return err
+	}
+	defer space.Close()
+
+	// 속성 생성
+	attr, err := dataset.CreateAttribute(attributeName, dataType, space)
+	if err != nil {
+		log.Fatalf("Failed to create attribute: %s", err)
+		return err
+	}
+	defer attr.Close()
+
+	// 속성 데이터 쓰기
+	err = attr.Write(attrData, dataType)
+	if err != nil {
+		log.Fatalf("Failed to write attribute: %s", err)
+		return err
+	}
+
+	return nil
+}
