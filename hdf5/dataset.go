@@ -29,7 +29,7 @@ func CreateDataset(group *hdf5.CommonFG, datasetName string, space []uint) (*Dat
 	return &DataSet{dset}, err
 }
 
-func (ds *DataSet) AddDatasetAttribute(attributeName string, attrData []int32) error {
+func (ds *DataSet) AddDatasetAttributeInt(attributeName string, attrData []int32) error {
 	space, err := hdf5.CreateSimpleDataspace([]uint{1}, nil) // 1차원 데이터 공간
 	if err != nil {
 		log.Fatalf("Failed to create dataspace: %s", err)
@@ -51,5 +51,56 @@ func (ds *DataSet) AddDatasetAttribute(attributeName string, attrData []int32) e
 		log.Fatalf("Failed to write attribute: %s", err)
 		return err
 	}
+	return nil
+}
+
+func (ds *DataSet) AddDatasetAttributeFloat(attributeName string, attrData []float64) error {
+	space, err := hdf5.CreateSimpleDataspace([]uint{1}, nil)
+	if err != nil {
+		log.Fatalf("Failed to create dataspace: %s", err)
+		return err
+	}
+	defer space.Close()
+
+	attr, err := ds.CreateAttribute(attributeName, hdf5.T_NATIVE_DOUBLE, space)
+	if err != nil {
+		log.Fatalf("Failed to create attribute: %s", err)
+		return err
+	}
+	defer attr.Close()
+
+	// Preparing data for writing based on type
+
+	err = attr.Write(&attrData[0], hdf5.T_NATIVE_DOUBLE)
+	if err != nil {
+		log.Fatalf("Failed to write attribute: %s", err)
+		return err
+	}
+
+	return nil
+}
+func (ds *DataSet) AddDatasetAttributeString(attributeName string, attrData []string) error {
+	space, err := hdf5.CreateSimpleDataspace([]uint{1}, nil)
+	if err != nil {
+		log.Fatalf("Failed to create dataspace: %s", err)
+		return err
+	}
+	defer space.Close()
+
+	attr, err := ds.CreateAttribute(attributeName, hdf5.T_GO_STRING, space)
+	if err != nil {
+		log.Fatalf("Failed to create attribute: %s", err)
+		return err
+	}
+	defer attr.Close()
+
+	// Preparing data for writing based on type
+
+	err = attr.Write(&attrData[0], hdf5.T_GO_STRING)
+	if err != nil {
+		log.Fatalf("Failed to write attribute: %s", err)
+		return err
+	}
+
 	return nil
 }
