@@ -21,6 +21,16 @@ func CreateFile(fileName string) (*File, error) {
 	return &File{file}, nil
 }
 
+func OpenFile(fileName string) (*File, error) {
+	file, err := hdf5.OpenFile("example.h5", hdf5.F_ACC_RDONLY)
+	if err != nil {
+		log.Fatalf("Failed to open file: %s", err)
+	}
+	// defer file.Close()
+
+	return &File{file}, nil
+}
+
 func (f *File) GetFileName() string {
 	return f.FileName()
 }

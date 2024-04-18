@@ -29,6 +29,7 @@ func CreateDataset(group *hdf5.CommonFG, datasetName string, space []uint) (*Dat
 	return &DataSet{dset}, err
 }
 
+// TODO:Int,Float,String 합칠 것
 func (ds *DataSet) AddDatasetAttributeInt(attributeName string, attrData []int32) error {
 	space, err := hdf5.CreateSimpleDataspace([]uint{1}, nil) // 1차원 데이터 공간
 	if err != nil {
@@ -103,4 +104,22 @@ func (ds *DataSet) AddDatasetAttributeString(attributeName string, attrData []st
 	}
 
 	return nil
+}
+
+func (ds *DataGroup) GetDatasetAttribute(attributeName string) string {
+	// 속성 열기 (속성의 이름을 알고 있어야 합니다)
+	attr, err := ds.OpenAttribute(attributeName)
+	if err != nil {
+		log.Fatalf("Failed to open attribute "+attributeName+": %s", err)
+	}
+	defer attr.Close()
+
+	// 속성 타입에 따른 적절한 변수 타입 선언
+	var value string
+
+	// 속성 읽기
+	if err := attr.Read(&value, hdf5.T_GO_STRING); err != nil {
+		log.Fatalf("Failed to read attribute "+attributeName+": %s", err)
+	}
+	return value
 }
